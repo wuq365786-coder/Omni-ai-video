@@ -1,0 +1,2275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Omni AI Video Generator | Text, Image, and Reference-Based AI Videos</title>
+  <meta name="description" content="Omni AI Video helps you create short AI videos from text prompts, images, and reference clips. Generate MP4 clips with optional audio, multiple aspect ratios, and short-form output options for social posts, ads, demos, and creative tests.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7bff'/%3E%3Cpath d='M20 45V19h10.8c8.1 0 13.2 5 13.2 13s-5.1 13-13.2 13H20Zm7-6h3.4c4.3 0 6.5-2.6 6.5-7s-2.2-7-6.5-7H27v14Z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #05070d;
+      --bg-2: #080d18;
+      --panel: #0d1424;
+      --panel-2: #101a2e;
+      --line: rgba(148, 163, 184, 0.22);
+      --line-strong: rgba(96, 165, 250, 0.42);
+      --text: #f8fbff;
+      --muted: #a9b7cc;
+      --soft: #d8e5f7;
+      --blue: #2f7bff;
+      --blue-2: #60a5fa;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      --radius: 8px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(47, 123, 255, 0.22), transparent 32rem),
+        radial-gradient(circle at 86% 8%, rgba(34, 211, 238, 0.14), transparent 28rem),
+        linear-gradient(180deg, #05070d 0%, #070a12 44%, #05070d 100%);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      z-index: 100;
+      padding: 0.7rem 1rem;
+      border-radius: var(--radius);
+      background: var(--blue);
+      color: white;
+      transition: top 160ms ease;
+    }
+
+    .skip-link:focus {
+      top: 1rem;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .nav-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(5, 7, 13, 0.82);
+      backdrop-filter: blur(18px);
+    }
+
+    .mobile-section-nav {
+      display: none;
+      width: 100%;
+      overflow-x: auto;
+      gap: 0.55rem;
+      padding: 0 1rem 0.75rem;
+      scrollbar-width: none;
+    }
+
+    .mobile-section-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mobile-section-nav a {
+      flex: 0 0 auto;
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      border-radius: var(--radius);
+      padding: 0.45rem 0.6rem;
+      background: rgba(15, 23, 42, 0.74);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .mobile-section-nav a:hover,
+    .mobile-section-nav a:focus-visible {
+      color: white;
+      border-color: rgba(96, 165, 250, 0.7);
+      outline: none;
+    }
+
+    .nav {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      box-shadow: 0 0 24px rgba(47, 123, 255, 0.44);
+      color: white;
+      font-weight: 900;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .nav-links a {
+      padding: 0.45rem 0;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--text);
+      border-color: var(--blue-2);
+      outline: none;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .language-select {
+      min-height: 2.75rem;
+      max-width: 10.5rem;
+      border-radius: var(--radius);
+      border: 1px solid rgba(96, 165, 250, 0.36);
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--text);
+      padding: 0 0.7rem;
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .language-select:focus-visible {
+      outline: 2px solid rgba(96, 165, 250, 0.8);
+      outline-offset: 2px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      padding: 0.75rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid rgba(96, 165, 250, 0.42);
+      background: rgba(15, 23, 42, 0.78);
+      color: var(--text);
+      font-weight: 750;
+      line-height: 1;
+      box-shadow: none;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(96, 165, 250, 0.82);
+      outline: none;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--blue), #1d4ed8);
+      border-color: rgba(96, 165, 250, 0.72);
+      color: white;
+      box-shadow: 0 16px 38px rgba(47, 123, 255, 0.32);
+    }
+
+    main {
+      overflow: hidden;
+    }
+
+    section {
+      scroll-margin-top: 92px;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      min-height: calc(100vh - 72px);
+      display: grid;
+      align-items: center;
+      padding: 5.2rem 0 3.5rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr);
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.38rem 0.65rem;
+      border: 1px solid rgba(96, 165, 250, 0.34);
+      border-radius: var(--radius);
+      background: rgba(47, 123, 255, 0.1);
+      color: #cce5ff;
+      font-size: 0.86rem;
+      font-weight: 750;
+    }
+
+    .pulse {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 0 5px rgba(34, 211, 238, 0.13);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.05;
+      max-width: 100%;
+      white-space: nowrap;
+    }
+
+    h1 {
+      margin-top: 1.2rem;
+      font-size: clamp(3.2rem, 8vw, 6.8rem);
+      font-weight: 900;
+    }
+
+    h2 {
+      font-size: clamp(1.45rem, 3.4vw, 3.5rem);
+      font-weight: 860;
+    }
+
+    h3 {
+      font-size: clamp(0.98rem, 1.45vw, 1.35rem);
+      font-weight: 800;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 1.25rem 0 0;
+      color: var(--soft);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.65;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-top: 1.8rem;
+    }
+
+    .hero-note {
+      margin-top: 1.25rem;
+      color: var(--muted);
+      max-width: 690px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-top: 2rem;
+      max-width: 660px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.9rem;
+      background: rgba(13, 20, 36, 0.62);
+    }
+
+    .metric strong {
+      display: block;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .mockup {
+      position: relative;
+      border: 1px solid rgba(96, 165, 250, 0.32);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(16, 26, 46, 0.94), rgba(7, 13, 25, 0.96));
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .mockup::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(96, 165, 250, 0.08) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(96, 165, 250, 0.06) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: linear-gradient(180deg, black, transparent 78%);
+      pointer-events: none;
+    }
+
+    .mockup-top {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 0.36rem;
+    }
+
+    .window-dots span {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      background: #64748b;
+    }
+
+    .window-dots span:nth-child(1) {
+      background: #60a5fa;
+    }
+
+    .window-dots span:nth-child(2) {
+      background: #22d3ee;
+    }
+
+    .mockup-title {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .mockup-body {
+      position: relative;
+      padding: 1rem;
+    }
+
+    .mode-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      padding: 0.45rem 0.6rem;
+      border-radius: var(--radius);
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: #cbd5e1;
+      font-size: 0.8rem;
+      font-weight: 750;
+    }
+
+    .tab.active {
+      color: white;
+      border-color: rgba(96, 165, 250, 0.7);
+      background: rgba(47, 123, 255, 0.18);
+    }
+
+    .prompt-box {
+      min-height: 146px;
+      border: 1px solid rgba(96, 165, 250, 0.26);
+      border-radius: var(--radius);
+      padding: 1rem;
+      background: rgba(4, 9, 18, 0.82);
+      color: #e5eefc;
+      font-size: 0.92rem;
+    }
+
+    .prompt-label {
+      color: var(--blue-2);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.65rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 0.9rem;
+    }
+
+    .setting {
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      background: rgba(15, 23, 42, 0.72);
+    }
+
+    .setting small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .setting strong {
+      color: white;
+      font-size: 0.94rem;
+    }
+
+    .output-strip {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 0.8rem;
+      margin-top: 0.9rem;
+    }
+
+    .preview {
+      min-height: 132px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(96, 165, 250, 0.28);
+      background:
+        linear-gradient(135deg, rgba(47, 123, 255, 0.28), transparent 48%),
+        linear-gradient(45deg, rgba(34, 211, 238, 0.18), rgba(15, 23, 42, 0.9));
+      display: flex;
+      align-items: end;
+      padding: 0.75rem;
+    }
+
+    .preview span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 800;
+      color: white;
+      font-size: 0.86rem;
+    }
+
+    .export-card {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius);
+      padding: 0.85rem;
+      background: rgba(4, 9, 18, 0.7);
+    }
+
+    .export-card ul {
+      margin: 0;
+      padding-left: 1rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .section-pad {
+      padding: 5rem 0;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(280px, 0.6fr);
+      gap: 2rem;
+      align-items: end;
+      margin-bottom: 2rem;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.03rem;
+    }
+
+    .kicker {
+      margin-bottom: 0.7rem;
+      color: var(--blue-2);
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+    }
+
+    .copy-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(180deg, rgba(13, 20, 36, 0.84), rgba(8, 13, 24, 0.78));
+    }
+
+    .copy-panel p {
+      color: var(--soft);
+      margin: 0;
+    }
+
+    .copy-panel p + p {
+      margin-top: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      background: rgba(13, 20, 36, 0.74);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(96, 165, 250, 0.46);
+      background: rgba(16, 26, 46, 0.86);
+    }
+
+    .card p {
+      margin: 0.7rem 0 0;
+      color: var(--muted);
+    }
+
+    .video-gallery {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .video-card {
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .video-thumb {
+      position: relative;
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .video-card video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      object-fit: cover;
+      background: #020617;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .video-thumb::after {
+      content: "Open preview";
+      position: absolute;
+      left: 50%;
+      bottom: 1rem;
+      transform: translateX(-50%);
+      padding: 0.55rem 0.75rem;
+      border: 1px solid rgba(96, 165, 250, 0.62);
+      border-radius: var(--radius);
+      background: rgba(5, 7, 13, 0.82);
+      color: white;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.36);
+    }
+
+    .video-thumb:hover::after,
+    .video-thumb:focus-visible::after {
+      background: rgba(47, 123, 255, 0.9);
+    }
+
+    .video-thumb:focus-visible {
+      outline: 2px solid rgba(96, 165, 250, 0.84);
+      outline-offset: 3px;
+    }
+
+    .video-card-body {
+      padding: 1rem;
+    }
+
+    .video-card-body p {
+      margin-top: 0.55rem;
+      font-size: 0.92rem;
+    }
+
+    .card .label {
+      display: inline-flex;
+      margin-bottom: 0.85rem;
+      color: #cce5ff;
+      background: rgba(47, 123, 255, 0.12);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      border-radius: var(--radius);
+      padding: 0.25rem 0.45rem;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .icon {
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      background: rgba(47, 123, 255, 0.12);
+      color: #dbeafe;
+      font-weight: 900;
+    }
+
+    .steps {
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      padding-left: 4.2rem;
+      min-height: 100%;
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 1.25rem;
+      top: 1.25rem;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: white;
+      font-weight: 900;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .chip {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: var(--radius);
+      padding: 0.42rem 0.56rem;
+      color: #dbeafe;
+      background: rgba(15, 23, 42, 0.76);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .feature-band {
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(47, 123, 255, 0.12), transparent 48%),
+        rgba(13, 20, 36, 0.72);
+      padding: clamp(1.2rem, 3vw, 2rem);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(13, 20, 36, 0.74);
+    }
+
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th {
+      color: #dbeafe;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(47, 123, 255, 0.08);
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    td strong {
+      color: var(--text);
+    }
+
+    .prompt-list {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .prompt-list li {
+      border-left: 2px solid var(--blue-2);
+      border-radius: var(--radius);
+      padding: 0.8rem 1rem;
+      background: rgba(13, 20, 36, 0.72);
+      color: var(--soft);
+    }
+
+    .checklist {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      columns: 2;
+      column-gap: 1rem;
+    }
+
+    .checklist li {
+      break-inside: avoid;
+      margin: 0 0 0.65rem;
+      color: var(--muted);
+    }
+
+    .checklist li::before {
+      content: "✓";
+      color: var(--cyan);
+      font-weight: 900;
+      margin-right: 0.45rem;
+    }
+
+    .trust {
+      border: 1px solid rgba(34, 211, 238, 0.32);
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.09), rgba(47, 123, 255, 0.08));
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(13, 20, 36, 0.74);
+      padding: 0;
+      overflow: hidden;
+    }
+
+    details + details {
+      margin-top: 0.75rem;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 1rem 1.1rem;
+      color: white;
+      font-weight: 800;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      float: right;
+      color: var(--blue-2);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    details p {
+      margin: 0;
+      padding: 0 1.1rem 1.1rem;
+      color: var(--muted);
+    }
+
+    .video-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(2, 6, 23, 0.86);
+      backdrop-filter: blur(14px);
+    }
+
+    .video-modal.open {
+      display: flex;
+    }
+
+    .video-modal-panel {
+      width: min(960px, 100%);
+      border: 1px solid rgba(96, 165, 250, 0.38);
+      border-radius: var(--radius);
+      background: rgba(5, 7, 13, 0.96);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .video-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .video-modal-head strong {
+      color: white;
+      white-space: nowrap;
+    }
+
+    .video-modal-close {
+      min-height: 2.35rem;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid rgba(96, 165, 250, 0.46);
+      border-radius: var(--radius);
+      background: rgba(15, 23, 42, 0.9);
+      color: white;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .video-modal-close:hover,
+    .video-modal-close:focus-visible {
+      background: rgba(47, 123, 255, 0.85);
+      outline: none;
+    }
+
+    .video-modal video {
+      display: block;
+      width: 100%;
+      max-height: 78vh;
+      background: #020617;
+    }
+
+    .video-modal-status {
+      display: none;
+      padding: 1rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .video-modal-status.show {
+      display: block;
+    }
+
+    .cta {
+      text-align: center;
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      border-radius: var(--radius);
+      padding: clamp(2rem, 6vw, 4rem);
+      background:
+        linear-gradient(135deg, rgba(47, 123, 255, 0.2), rgba(34, 211, 238, 0.09)),
+        rgba(13, 20, 36, 0.84);
+      box-shadow: var(--shadow);
+    }
+
+    .cta p {
+      max-width: 760px;
+      margin: 1rem auto 0;
+      color: var(--soft);
+      font-size: 1.1rem;
+    }
+
+    footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      padding: 2rem 0;
+      color: var(--muted);
+      background: rgba(2, 5, 11, 0.6);
+    }
+
+    .footer-grid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-grid strong {
+      color: white;
+    }
+
+    @media (max-width: 980px) {
+      .nav-links {
+        display: none;
+      }
+
+      .nav-wrap {
+        padding-bottom: 0.15rem;
+      }
+
+      .mobile-section-nav {
+        display: flex;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .section-head,
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .video-gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .video-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .mockup {
+        max-width: 680px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .nav {
+        min-height: 64px;
+      }
+
+      .nav .button {
+        display: none;
+      }
+
+      .language-select {
+        max-width: 7.4rem;
+        font-size: 0.82rem;
+      }
+
+      .brand {
+        font-size: 0.96rem;
+      }
+
+      h1 {
+        font-size: clamp(1.7rem, 8.6vw, 4.2rem);
+      }
+
+      h2 {
+        font-size: clamp(1.05rem, 5.3vw, 1.85rem);
+      }
+
+      h3 {
+        font-size: clamp(0.86rem, 4.2vw, 1.1rem);
+      }
+
+      .hero {
+        padding-top: 3.5rem;
+      }
+
+      .hero-grid {
+        gap: 2rem;
+      }
+
+      .hero-actions,
+      .cta .hero-actions {
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .settings-grid,
+      .output-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .step {
+        padding-left: 1.25rem;
+        padding-top: 4.1rem;
+      }
+
+      .checklist {
+        columns: 1;
+      }
+
+      .section-pad {
+        padding: 3.5rem 0;
+      }
+
+      .video-gallery {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav-wrap">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Omni AI Video home">
+        <span class="brand-mark">O</span>
+        <span>Omni AI Video</span>
+      </a>
+      <div class="nav-links" aria-label="Page sections">
+        <a href="#create">Create</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#examples">Examples</a>
+        <a href="#formats">Formats</a>
+        <a href="#use-cases">Use Cases</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <label class="sr-only" for="languageSelect">Choose language</label>
+        <select id="languageSelect" class="language-select" aria-label="Choose language">
+          <option value="en">English</option>
+          <option value="zh">简体中文</option>
+          <option value="es">Español</option>
+          <option value="hi">हिन्दी</option>
+          <option value="ar">العربية</option>
+          <option value="pt">Português</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+        </select>
+        <a class="button primary" href="#examples">Watch Examples</a>
+      </div>
+    </nav>
+    <div class="mobile-section-nav" aria-label="Mobile section navigation">
+      <a href="#create">Create</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#examples">Examples</a>
+      <a href="#formats">Formats</a>
+      <a href="#use-cases">Use Cases</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="top" class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow"><span class="pulse"></span> AI video creation from text, images, and references</div>
+          <h1>Omni AI Video Generator</h1>
+          <p class="lead">Create short AI videos from prompts, images, or reference clips in one streamlined workflow. Add optional audio, choose the format you need, and export MP4 clips for social posts, product ideas, ads, demos, and creative experiments.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#examples">Watch Examples</a>
+            <a class="button" href="#workflow">See How It Works</a>
+          </div>
+          <p class="hero-note">Built for short-form video creation across TikTok, Reels, Shorts, YouTube, product pages, and campaign drafts.</p>
+          <div class="metrics" aria-label="Supported creation details">
+            <div class="metric"><strong>5, 10, 15s</strong><span>short-form durations</span></div>
+            <div class="metric"><strong>16:9 / 9:16</strong><span>horizontal and vertical</span></div>
+            <div class="metric"><strong>MP4</strong><span>export for publishing</span></div>
+          </div>
+        </div>
+
+        <aside id="generator" class="mockup" aria-label="Omni AI Video generator interface mockup">
+          <div class="mockup-top">
+            <div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="mockup-title">Generator workspace</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mode-tabs" aria-label="Creation modes">
+              <span class="tab active">Text-to-video</span>
+              <span class="tab">Image-to-video</span>
+              <span class="tab">Reference</span>
+              <span class="tab">Audio</span>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-label">Prompt</div>
+              A close-up product reveal with soft morning light, slow camera push-in, optional ambient sound, and a clean commercial style.
+            </div>
+            <div class="settings-grid">
+              <div class="setting"><small>Aspect Ratio</small><strong>9:16</strong></div>
+              <div class="setting"><small>Resolution</small><strong>1080p</strong></div>
+              <div class="setting"><small>Duration</small><strong>10 seconds</strong></div>
+              <div class="setting"><small>Export</small><strong>MP4</strong></div>
+            </div>
+            <div class="output-strip">
+              <div class="preview"><span>● Preview ready</span></div>
+              <div class="export-card">
+                <div class="prompt-label">Output</div>
+                <ul>
+                  <li>Optional audio on</li>
+                  <li>Content filtering enabled</li>
+                  <li>Fixed camera available</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="create" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Product</div>
+            <h2>What Is Omni AI Video?</h2>
+          </div>
+          <p>A practical AI video creation workflow for turning prompts, images, and short reference assets into video clips.</p>
+        </div>
+        <div class="copy-panel">
+          <p>Omni AI Video is an AI video generation tool that helps you turn text prompts, images, and short reference assets into video clips. Instead of moving between separate tools for image animation, video generation, voice, sound, and editing, you can start from one place and create a short video draft faster.</p>
+          <p>Use Omni AI Video to test social video ideas, animate a product image, create an ad concept, draft a demo clip, or explore a visual story before committing to a longer production workflow.</p>
+          <p>Omni AI Video is best understood as a practical creation workflow. It should not be presented as a Google-owned product page or as confirmed access to any unverified third-party model capability.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Creation modes</div>
+            <h2>Create More Than One Kind of AI Video</h2>
+          </div>
+          <p>Different projects start from different materials. Begin with the asset you already have.</p>
+        </div>
+        <div class="grid grid-3">
+          <article class="card">
+            <span class="label">Prompt</span>
+            <h3>Text-to-Video</h3>
+            <p>Start with a prompt, script, scene idea, or short description. Describe the subject, action, camera movement, mood, setting, dialogue, and audio direction.</p>
+          </article>
+          <article class="card">
+            <span class="label">Image</span>
+            <h3>Image-to-Video</h3>
+            <p>Upload a product photo, character image, ecommerce asset, thumbnail, or visual reference and turn it into motion.</p>
+          </article>
+          <article class="card">
+            <span class="label">Reference</span>
+            <h3>Reference-Based Video</h3>
+            <p>Use a short reference image or video to guide subject, style, composition, or motion direction in the generated result.</p>
+          </article>
+          <article class="card">
+            <span class="label">Control</span>
+            <h3>First and Last Frame</h3>
+            <p>Guide clearer openings and endings for product transitions, before-and-after shots, narrative beats, and controlled motion experiments.</p>
+          </article>
+          <article class="card">
+            <span class="label">Sound</span>
+            <h3>Optional Reference Audio</h3>
+            <p>Use audio-related inputs and settings when voice, atmosphere, music direction, or sound context matters for a short clip.</p>
+          </article>
+          <article class="card">
+            <span class="label">Platforms</span>
+            <h3>Social-Ready Formats</h3>
+            <p>Create vertical or horizontal clips for TikTok, Reels, Shorts, YouTube, landing pages, product pages, and campaign drafts.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Workflow</div>
+            <h2>Create an AI Video in Three Steps</h2>
+          </div>
+          <p>Pick a starting point, describe the scene, then generate and download a short MP4 clip.</p>
+        </div>
+        <div class="grid grid-3 steps">
+          <article class="card step">
+            <h3>Choose Your Starting Point</h3>
+            <p>Begin with a text prompt, image, reference image, reference video, reference audio file, or first and last frames.</p>
+            <div class="chip-list">
+              <span class="chip">Text-to-video</span>
+              <span class="chip">Image-to-video</span>
+              <span class="chip">Omni reference</span>
+              <span class="chip">Reference-to-video</span>
+              <span class="chip">First and last frame</span>
+            </div>
+          </article>
+          <article class="card step">
+            <h3>Describe and Adjust</h3>
+            <p>Write a clear prompt with subject, action, scene, camera direction, mood, and audio detail. Then select output settings.</p>
+            <div class="chip-list">
+              <span class="chip">Auto</span>
+              <span class="chip">16:9</span>
+              <span class="chip">9:16</span>
+              <span class="chip">480p</span>
+              <span class="chip">720p HD</span>
+              <span class="chip">1080p Full HD</span>
+            </div>
+          </article>
+          <article class="card step">
+            <h3>Generate and Download</h3>
+            <p>Generate the clip, review the result, and download it as an MP4 file for publishing or continued editing.</p>
+            <div class="chip-list">
+              <span class="chip">5 seconds</span>
+              <span class="chip">10 seconds</span>
+              <span class="chip">15 seconds</span>
+              <span class="chip">MP4 export</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="feature-band">
+          <div class="section-head">
+            <div>
+              <div class="kicker">Features</div>
+              <h2>Built for Fast AI Video Creation</h2>
+            </div>
+            <p>Omni AI Video brings the core parts of short video creation into one workflow for fast creative testing, social content, product visuals, and short clips.</p>
+          </div>
+          <div class="grid grid-3">
+            <article class="card">
+              <div class="icon">T</div>
+              <h3>Text, Image, and Reference Inputs</h3>
+              <p>Start from a written idea, static image, reference image, reference video, or first and last frames.</p>
+            </article>
+            <article class="card">
+              <div class="icon">A</div>
+              <h3>Optional Audio Generation</h3>
+              <p>Use audio generation options for short clips that need voice, atmosphere, music direction, or background sound.</p>
+            </article>
+            <article class="card">
+              <div class="icon">15</div>
+              <h3>Short-Form Output Options</h3>
+              <p>Use 5, 10, and 15-second duration options for social clips, product reveals, demos, and campaign drafts.</p>
+            </article>
+            <article class="card">
+              <div class="icon">↔</div>
+              <h3>Multiple Aspect Ratios</h3>
+              <p>Choose 16:9 for YouTube and websites, 9:16 for TikTok, Reels, and Shorts, or Auto for adaptive output.</p>
+            </article>
+            <article class="card">
+              <div class="icon">HD</div>
+              <h3>HD Export Choices</h3>
+              <p>Available resolution options include 480p, 720p HD, and 1080p Full HD.</p>
+            </article>
+            <article class="card">
+              <div class="icon">MP4</div>
+              <h3>MP4 Downloads</h3>
+              <p>Generated videos are delivered as MP4 files, making them easy to upload, share, archive, or edit.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Why use it</div>
+            <h2>A Faster Way to Explore Video Ideas</h2>
+          </div>
+          <p>Use Omni AI Video when you need quick creative directions before investing in a full shoot or longer edit.</p>
+        </div>
+        <div class="grid grid-3">
+          <article class="card">
+            <h3>Fewer Tools in the Workflow</h3>
+            <p>Reduce switching between image generation, video generation, voice, sound effects, resizing, and editing tools.</p>
+          </article>
+          <article class="card">
+            <h3>Faster Creative Testing</h3>
+            <p>Explore variations for hooks, product reveals, ad ideas, mood clips, character concepts, and campaign visuals.</p>
+          </article>
+          <article class="card">
+            <h3>Lower Editing Barrier</h3>
+            <p>A clear prompt, source image, or short reference asset can be enough to generate a useful first draft.</p>
+          </article>
+          <article class="card">
+            <h3>Better Fit for Short-Form</h3>
+            <p>Compact duration options fit short-form platforms, quick social posts, and focused creative tests.</p>
+          </article>
+          <article class="card">
+            <h3>Easier Iteration</h3>
+            <p>Adjust prompts, aspect ratios, durations, quality settings, audio settings, and reference assets.</p>
+          </article>
+          <article class="card">
+            <h3>Practical Drafting</h3>
+            <p>Create visual directions for social posts, demos, ecommerce assets, and product pages without a full production team.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="examples" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Video examples</div>
+            <h2>See Omni AI Video Outputs in Motion</h2>
+          </div>
+          <p>Five local MP4 examples show how short-form AI video outputs can support product scenes, social posts, demos, and creative tests.</p>
+        </div>
+        <div class="video-gallery" aria-label="Local Omni AI Video example videos">
+          <article class="card video-card">
+            <button class="video-thumb" type="button" data-video-src="videos/demo-20260514012830-video-1.mp4" data-video-title="Example Video 01">
+              <video preload="metadata" playsinline muted src="videos/demo-20260514012830-video-1.mp4"></video>
+            </button>
+            <div class="video-card-body">
+              <h3>Example Video 01</h3>
+              <p>A compact generated clip for checking visual motion, pacing, and short-form presentation.</p>
+            </div>
+          </article>
+          <article class="card video-card">
+            <button class="video-thumb" type="button" data-video-src="videos/demo-20260514012830-video-2.mp4" data-video-title="Example Video 02">
+              <video preload="metadata" playsinline muted src="videos/demo-20260514012830-video-2.mp4"></video>
+            </button>
+            <div class="video-card-body">
+              <h3>Example Video 02</h3>
+              <p>Use examples like this to evaluate scene direction, subject consistency, and edit-ready output.</p>
+            </div>
+          </article>
+          <article class="card video-card">
+            <button class="video-thumb" type="button" data-video-src="videos/demo-20260514012830-video-3.mp4" data-video-title="Example Video 03">
+              <video preload="metadata" playsinline muted src="videos/demo-20260514012830-video-3.mp4"></video>
+            </button>
+            <div class="video-card-body">
+              <h3>Example Video 03</h3>
+              <p>A longer local sample for reviewing motion detail, atmosphere, and MP4 playback quality.</p>
+            </div>
+          </article>
+          <article class="card video-card">
+            <button class="video-thumb" type="button" data-video-src="videos/demo-20260514012830-video-4.mp4" data-video-title="Example Video 04">
+              <video preload="metadata" playsinline muted src="videos/demo-20260514012830-video-4.mp4"></video>
+            </button>
+            <div class="video-card-body">
+              <h3>Example Video 04</h3>
+              <p>Helpful for comparing how generated clips can work in social, product, or campaign drafts.</p>
+            </div>
+          </article>
+          <article class="card video-card">
+            <button class="video-thumb" type="button" data-video-src="videos/demo-20260514012830-video-5.mp4" data-video-title="Example Video 05">
+              <video preload="metadata" playsinline muted src="videos/demo-20260514012830-video-5.mp4"></video>
+            </button>
+            <div class="video-card-body">
+              <h3>Example Video 05</h3>
+              <p>A local preview slot for showing another short AI video result without external hosting.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="use-cases" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Use cases</div>
+            <h2>Use Omni AI Video for Everyday Creative Work</h2>
+          </div>
+          <p>Move quickly from an idea or existing asset to a short visual result.</p>
+        </div>
+        <div class="grid grid-4">
+          <article class="card"><h3>Social Media Videos</h3><p>Create vertical clips for TikTok, Reels, and Shorts. Test hooks, product scenes, character moments, or short visual stories.</p></article>
+          <article class="card"><h3>Product Demos</h3><p>Turn product images, screenshots, or concept visuals into motion for reveals, app previews, and early demo ideas.</p></article>
+          <article class="card"><h3>Ecommerce Creatives</h3><p>Animate product photos, show use cases, create lifestyle scenes, or test ad concepts without a full shoot for every idea.</p></article>
+          <article class="card"><h3>Short Ad Concepts</h3><p>Draft multiple versions of a creative direction and use 5, 10, or 15-second clips to test pacing and framing.</p></article>
+          <article class="card"><h3>Creator Content</h3><p>Explore character scenes, visual moods, story fragments, and repeatable short-form formats.</p></article>
+          <article class="card"><h3>Explainer Clips</h3><p>Create short explanatory visuals for product features, educational snippets, or simple concept introductions.</p></article>
+          <article class="card"><h3>Website Hero Videos</h3><p>Generate short background or hero video concepts, then refine with branding, compression, captions, or exact timing.</p></article>
+          <article class="card"><h3>Localization Experiments</h3><p>Test multilingual or region-specific content directions for experimentation and versioning.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="formats" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Formats</div>
+            <h2>Know What You Can Upload and Export</h2>
+          </div>
+          <p>Concrete input, setting, and output details help teams decide whether the workflow fits their project.</p>
+        </div>
+
+        <div class="table-wrap" aria-label="Supported upload details">
+          <table>
+            <thead>
+              <tr>
+                <th>Input or Setting</th>
+                <th>Supported Details</th>
+                <th>Best Used For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Text prompt</strong></td>
+                <td>Prompt, negative prompt, subject, action, camera direction, mood, dialogue, audio direction</td>
+                <td>Text-to-video, ad ideas, explainers, creative testing</td>
+              </tr>
+              <tr>
+                <td><strong>General image upload</strong></td>
+                <td>JPG, PNG, or WebP, up to 10MB</td>
+                <td>Image-to-video, product photos, thumbnails, visual references</td>
+              </tr>
+              <tr>
+                <td><strong>Reference image</strong></td>
+                <td>JPEG, PNG, or WebP, 300-6000px, up to 30MB</td>
+                <td>Style, subject, composition, and visual direction</td>
+              </tr>
+              <tr>
+                <td><strong>General video upload</strong></td>
+                <td>MP4, MOV, or WebM, up to 50MB</td>
+                <td>Reference assets and motion direction</td>
+              </tr>
+              <tr>
+                <td><strong>Reference video</strong></td>
+                <td>MP4 or MOV, 480-720P, 2-15 seconds, up to 50MB</td>
+                <td>Guiding generated scenes from short video references</td>
+              </tr>
+              <tr>
+                <td><strong>Reference audio</strong></td>
+                <td>WAV or MP3, 2-15 seconds, up to 15MB</td>
+                <td>Voice, ambience, music direction, and sound context</td>
+              </tr>
+              <tr>
+                <td><strong>Generation settings</strong></td>
+                <td>Auto, 16:9, 9:16; 480p, 720p HD, 1080p Full HD; 5, 10, 15 seconds</td>
+                <td>Platform-specific short-form output</td>
+              </tr>
+              <tr>
+                <td><strong>Output</strong></td>
+                <td>MP4 video export</td>
+                <td>Social platforms, websites, ads, presentations, or editing tools</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="chip-list" aria-label="Additional generation settings">
+          <span class="chip">Lightweight mode</span>
+          <span class="chip">High quality mode</span>
+          <span class="chip">Audio generation</span>
+          <span class="chip">Content filtering</span>
+          <span class="chip">Fixed camera</span>
+          <span class="chip">First frame</span>
+          <span class="chip">Last frame</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Prompting</div>
+            <h2>Write Prompts Like Short Scene Directions</h2>
+          </div>
+          <p>Clear prompts help Omni AI Video understand what to generate. Treat each prompt like a compact scene brief.</p>
+        </div>
+        <div class="grid grid-2">
+          <div class="copy-panel">
+            <h3>Include</h3>
+            <ul class="checklist">
+              <li>Subject</li>
+              <li>Action</li>
+              <li>Setting</li>
+              <li>Camera direction</li>
+              <li>Mood</li>
+              <li>Visual style</li>
+              <li>Audio direction</li>
+              <li>Dialogue in quotation marks</li>
+            </ul>
+          </div>
+          <div>
+            <ol class="prompt-list">
+              <li>"A skincare bottle on a marble sink, water droplets forming on the glass, slow macro camera movement, soft bathroom light, gentle ambient sound."</li>
+              <li>"A food delivery app interface appears on a phone, the camera pulls back to show a busy lunch table, upbeat background music, clean commercial style."</li>
+              <li>"A fashion sneaker rotates on a concrete floor, neon reflections, quick 10-second product reveal, energetic streetwear mood."</li>
+              <li>"A teacher explains a simple science concept with animated visual elements in the background, friendly tone, clean educational style."</li>
+              <li>"A travel creator stands on a quiet city street at sunrise and says, 'Here is the easiest way to plan a weekend trip,' with soft street ambience."</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Audience</div>
+            <h2>Made for Creators, Marketers, and Small Teams</h2>
+          </div>
+          <p>Useful for people who want AI video without learning a complex chain of video, image, audio, and editing tools.</p>
+        </div>
+        <div class="grid grid-3">
+          <article class="card"><h3>Content Creators</h3><p>Explore short-form ideas, test hooks, create visual drafts, and produce more variations without starting from a blank editing timeline.</p></article>
+          <article class="card"><h3>Social Media Managers</h3><p>Create quick versions for different platforms, aspect ratios, moods, and campaign angles.</p></article>
+          <article class="card"><h3>Ecommerce Operators</h3><p>Turn product photos into motion, create lifestyle scenes, and test short ad concepts before larger production.</p></article>
+          <article class="card"><h3>Small Marketing Teams</h3><p>Draft campaign visuals, product demos, explainer clips, and landing page videos for early ideas.</p></article>
+          <article class="card"><h3>Founders and Indie Makers</h3><p>Create demo visuals, launch assets, social clips, and pitch materials when you need to communicate quickly.</p></article>
+          <article class="card"><h3>Users New to AI Video</h3><p>Try AI video creation without managing a complex multi-tool workflow.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="copy-panel trust">
+          <div class="kicker">Trust</div>
+          <h2>Independent Product, Clear Claims</h2>
+          <p>Omni AI Video is an independent AI video creation product. References to Omni, Gemini, Google, Veo, or related AI video technologies should not be read as official affiliation unless that affiliation is explicitly stated by the product.</p>
+          <p>This page focuses on what users can do inside Omni AI Video: create short clips from prompts, images, and references; use optional audio generation; choose practical output settings; and export MP4 files for publishing or editing.</p>
+          <p>Public information around "Gemini Omni" and related model names is limited and may include third-party reporting or inference. Product copy should stay grounded in the visible product workflow and user outcomes.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">FAQ</div>
+            <h2>Common Questions</h2>
+          </div>
+          <p>Answers focused on inputs, outputs, formats, audio, usage, and product positioning.</p>
+        </div>
+        <div>
+          <details>
+            <summary>What is Omni AI Video?</summary>
+            <p>Omni AI Video is an AI video generator for creating short video clips from text prompts, images, and reference assets. It is designed for social videos, product visuals, ad concepts, demos, explainers, and creative tests.</p>
+          </details>
+          <details>
+            <summary>Is Omni AI Video affiliated with Google?</summary>
+            <p>Omni AI Video should be presented as an independent product. Do not describe it as Google-owned unless there is explicit confirmation. References to Gemini, Google, or related AI video technologies should be handled as separate context, not as product ownership.</p>
+          </details>
+          <details>
+            <summary>Can I create videos from text?</summary>
+            <p>Yes. You can start with a text prompt and describe the subject, action, scene, style, camera movement, duration, aspect ratio, and audio direction.</p>
+          </details>
+          <details>
+            <summary>Can I animate an image into a video?</summary>
+            <p>Yes. Image-to-video workflows let you upload a static image and generate motion from it. This is useful for product photos, character images, ecommerce assets, and visual references.</p>
+          </details>
+          <details>
+            <summary>Can I use reference videos?</summary>
+            <p>Yes. Reference-to-video workflows can use short video references to guide the generated result. Current product copy lists MP4 or MOV reference videos at 480-720P, 2-15 seconds, up to 50MB.</p>
+          </details>
+          <details>
+            <summary>Does Omni AI Video generate audio?</summary>
+            <p>Omni AI Video includes audio generation options and audio-related inputs. This makes it useful for short clips that need voice, ambience, music direction, or sound context. Results can vary by prompt, input, model, and settings.</p>
+          </details>
+          <details>
+            <summary>What formats can I upload?</summary>
+            <p>The current product copy lists JPG, JPEG, PNG, and WebP for images; MP4, MOV, and WebM for video; and WAV or MP3 for reference audio. Upload limits vary by input type.</p>
+          </details>
+          <details>
+            <summary>What formats can I export?</summary>
+            <p>Generated videos are exported as MP4 files, which can be used on social platforms, websites, ads, presentations, or in editing software.</p>
+          </details>
+          <details>
+            <summary>How long can each generated clip be?</summary>
+            <p>Current duration options include 5 seconds, 10 seconds, and 15 seconds. These options are best suited to short-form content, product reveals, quick social posts, and creative testing.</p>
+          </details>
+          <details>
+            <summary>Which aspect ratios are supported?</summary>
+            <p>Available aspect ratio options include Auto, 16:9, and 9:16. Use 16:9 for YouTube, websites, and presentations. Use 9:16 for TikTok, Reels, and Shorts.</p>
+          </details>
+          <details>
+            <summary>What prompt style works best?</summary>
+            <p>Short, concrete prompts usually work best. Describe the subject, action, setting, camera movement, mood, visual style, and any audio direction. If the clip needs dialogue, put the spoken line in quotation marks.</p>
+          </details>
+          <details>
+            <summary>Can I use generated videos for commercial projects?</summary>
+            <p>Generated clips may be used according to the product's current usage terms. Review those terms before using outputs in commercial projects.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="cta">
+          <div class="kicker">Start</div>
+          <h2>Create Your First AI Video with Omni AI Video</h2>
+          <p>Start with a prompt, image, reference clip, or audio direction. Generate a short MP4 video, review the result, and use it for social content, product visuals, ads, demos, or further editing.</p>
+          <div class="hero-actions" style="justify-content:center">
+            <a class="button primary" href="#examples">Watch Examples</a>
+            <a class="button" href="#create">Try Text-to-Video</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div><strong>Omni AI Video</strong> · AI video creation from text, images, and references.</div>
+      <div>© 2026 Omni AI Video. Product claims should reflect current product behavior and terms.</div>
+    </div>
+  </footer>
+  <div class="video-modal" id="videoModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle">
+    <div class="video-modal-panel">
+      <div class="video-modal-head">
+        <strong id="videoModalTitle">Example Video</strong>
+        <button class="video-modal-close" type="button" id="videoModalClose">Close</button>
+      </div>
+      <video id="videoModalPlayer" controls playsinline></video>
+      <div class="video-modal-status" id="videoModalStatus">Loading video preview...</div>
+    </div>
+  </div>
+  <script>
+    const translations = {
+      zh: {
+        "Choose language": "选择语言",
+        "Create": "创作",
+        "Workflow": "工作流",
+        "Examples": "示例",
+        "Formats": "格式",
+        "Use Cases": "使用场景",
+        "FAQ": "常见问题",
+        "Start Creating": "开始创作",
+        "Watch Examples": "查看示例",
+        "AI video creation from text, images, and references": "从文本、图像和参考素材创建 AI 视频",
+        "Omni AI Video Generator": "Omni AI Video 生成器",
+        "Create short AI videos from prompts, images, or reference clips in one streamlined workflow. Add optional audio, choose the format you need, and export MP4 clips for social posts, product ideas, ads, demos, and creative experiments.": "在一个简洁流程中，从提示词、图片或参考片段创建短 AI 视频。你可以添加可选音频，选择所需格式，并导出 MP4，用于社交帖子、产品想法、广告、演示和创意实验。",
+        "See How It Works": "查看工作流程",
+        "Built for short-form video creation across TikTok, Reels, Shorts, YouTube, product pages, and campaign drafts.": "适合为 TikTok、Reels、Shorts、YouTube、产品页和活动草稿制作短视频。",
+        "short-form durations": "短视频时长",
+        "horizontal and vertical": "横屏与竖屏",
+        "export for publishing": "导出发布",
+        "Generator workspace": "生成器工作区",
+        "Text-to-video": "文生视频",
+        "Image-to-video": "图生视频",
+        "Reference": "参考",
+        "Audio": "音频",
+        "Prompt": "提示词",
+        "A close-up product reveal with soft morning light, slow camera push-in, optional ambient sound, and a clean commercial style.": "一个产品特写展示，柔和晨光，缓慢推镜，可选环境声，干净的商业风格。",
+        "Aspect Ratio": "宽高比",
+        "Resolution": "分辨率",
+        "Duration": "时长",
+        "Export": "导出",
+        "Output": "输出",
+        "Optional audio on": "可选音频开启",
+        "Content filtering enabled": "内容过滤开启",
+        "Fixed camera available": "可使用固定镜头",
+        "Product": "产品",
+        "What Is Omni AI Video?": "什么是 Omni AI Video？",
+        "A practical AI video creation workflow for turning prompts, images, and short reference assets into video clips.": "一个实用的 AI 视频创作流程，可将提示词、图像和短参考素材转成视频片段。",
+        "Omni AI Video is an AI video generation tool that helps you turn text prompts, images, and short reference assets into video clips. Instead of moving between separate tools for image animation, video generation, voice, sound, and editing, you can start from one place and create a short video draft faster.": "Omni AI Video 是一款 AI 视频生成工具，帮助你把文本提示词、图片和短参考素材变成视频片段。无需在图像动画、视频生成、语音、声音和剪辑工具之间切换，你可以从一个入口更快创建短视频草稿。",
+        "Use Omni AI Video to test social video ideas, animate a product image, create an ad concept, draft a demo clip, or explore a visual story before committing to a longer production workflow.": "你可以用 Omni AI Video 测试社交视频想法、让产品图片动起来、创建广告概念、起草演示片段，或在进入更长制作流程前探索视觉故事。",
+        "Omni AI Video is best understood as a practical creation workflow. It should not be presented as a Google-owned product page or as confirmed access to any unverified third-party model capability.": "Omni AI Video 更适合作为一个实用创作流程来理解。不应把它表述为 Google 旗下产品页，也不应把未经验证的第三方模型能力说成已确认能力。",
+        "Creation modes": "创作模式",
+        "Create More Than One Kind of AI Video": "创建多种类型的 AI 视频",
+        "Different projects start from different materials. Begin with the asset you already have.": "不同项目从不同素材开始。你可以直接使用手头已有的素材。",
+        "Text-to-Video": "文生视频",
+        "Start with a prompt, script, scene idea, or short description. Describe the subject, action, camera movement, mood, setting, dialogue, and audio direction.": "从提示词、脚本、场景想法或简短描述开始。说明主体、动作、镜头运动、情绪、场景、对白和音频方向。",
+        "Image-to-Video": "图生视频",
+        "Upload a product photo, character image, ecommerce asset, thumbnail, or visual reference and turn it into motion.": "上传产品照片、角色图、电商素材、缩略图或视觉参考，并将其转化为动态画面。",
+        "Reference-Based Video": "参考生成视频",
+        "Use a short reference image or video to guide subject, style, composition, or motion direction in the generated result.": "使用短参考图片或视频来指导生成结果中的主体、风格、构图或运动方向。",
+        "Control": "控制",
+        "First and Last Frame": "首帧与尾帧",
+        "Guide clearer openings and endings for product transitions, before-and-after shots, narrative beats, and controlled motion experiments.": "为产品转场、前后对比、叙事节拍和可控运动实验提供更清晰的开始与结束。",
+        "Sound": "声音",
+        "Optional Reference Audio": "可选参考音频",
+        "Use audio-related inputs and settings when voice, atmosphere, music direction, or sound context matters for a short clip.": "当短片需要语音、氛围、音乐方向或声音语境时，可使用音频相关输入和设置。",
+        "Platforms": "平台",
+        "Social-Ready Formats": "适合社交平台的格式",
+        "Create vertical or horizontal clips for TikTok, Reels, Shorts, YouTube, landing pages, product pages, and campaign drafts.": "为 TikTok、Reels、Shorts、YouTube、落地页、产品页和活动草稿创建竖屏或横屏片段。",
+        "Create an AI Video in Three Steps": "三步创建 AI 视频",
+        "Pick a starting point, describe the scene, then generate and download a short MP4 clip.": "选择起点，描述场景，然后生成并下载短 MP4 视频。",
+        "Choose Your Starting Point": "选择起点",
+        "Begin with a text prompt, image, reference image, reference video, reference audio file, or first and last frames.": "从文本提示词、图片、参考图片、参考视频、参考音频文件或首尾帧开始。",
+        "Omni reference": "Omni 参考",
+        "Reference-to-video": "参考生视频",
+        "Describe and Adjust": "描述并调整",
+        "Write a clear prompt with subject, action, scene, camera direction, mood, and audio detail. Then select output settings.": "写清楚主体、动作、场景、镜头方向、情绪和音频细节，然后选择输出设置。",
+        "Generate and Download": "生成并下载",
+        "Generate the clip, review the result, and download it as an MP4 file for publishing or continued editing.": "生成片段，查看结果，并下载为 MP4 文件用于发布或继续剪辑。",
+        "Features": "功能",
+        "Built for Fast AI Video Creation": "为快速 AI 视频创作而设计",
+        "Omni AI Video brings the core parts of short video creation into one workflow for fast creative testing, social content, product visuals, and short clips.": "Omni AI Video 将短视频创作的核心环节整合到一个流程中，适合快速创意测试、社交内容、产品视觉和短片制作。",
+        "Text, Image, and Reference Inputs": "文本、图像和参考输入",
+        "Start from a written idea, static image, reference image, reference video, or first and last frames.": "从文字想法、静态图片、参考图片、参考视频或首尾帧开始。",
+        "Optional Audio Generation": "可选音频生成",
+        "Use audio generation options for short clips that need voice, atmosphere, music direction, or background sound.": "为需要语音、氛围、音乐方向或背景声的短片使用音频生成选项。",
+        "Short-Form Output Options": "短视频输出选项",
+        "Use 5, 10, and 15-second duration options for social clips, product reveals, demos, and campaign drafts.": "使用 5、10、15 秒时长选项，制作社交片段、产品展示、演示和活动草稿。",
+        "Multiple Aspect Ratios": "多种宽高比",
+        "Choose 16:9 for YouTube and websites, 9:16 for TikTok, Reels, and Shorts, or Auto for adaptive output.": "YouTube 和网站可选 16:9，TikTok、Reels 和 Shorts 可选 9:16，也可用 Auto 自适应输出。",
+        "HD Export Choices": "HD 导出选择",
+        "Available resolution options include 480p, 720p HD, and 1080p Full HD.": "可用分辨率包括 480p、720p HD 和 1080p Full HD。",
+        "MP4 Downloads": "MP4 下载",
+        "Generated videos are delivered as MP4 files, making them easy to upload, share, archive, or edit.": "生成的视频以 MP4 文件交付，便于上传、分享、归档或剪辑。",
+        "Why use it": "为什么使用",
+        "A Faster Way to Explore Video Ideas": "更快探索视频创意",
+        "Use Omni AI Video when you need quick creative directions before investing in a full shoot or longer edit.": "当你需要在完整拍摄或长剪辑前快速探索创意方向时，可以使用 Omni AI Video。",
+        "Fewer Tools in the Workflow": "减少工具切换",
+        "Reduce switching between image generation, video generation, voice, sound effects, resizing, and editing tools.": "减少在图像生成、视频生成、语音、音效、尺寸调整和剪辑工具之间切换。",
+        "Faster Creative Testing": "更快创意测试",
+        "Explore variations for hooks, product reveals, ad ideas, mood clips, character concepts, and campaign visuals.": "探索钩子、产品展示、广告想法、氛围片段、角色概念和活动视觉的多个版本。",
+        "Lower Editing Barrier": "降低剪辑门槛",
+        "A clear prompt, source image, or short reference asset can be enough to generate a useful first draft.": "一个清晰提示词、源图片或短参考素材，就可能生成有用的初稿。",
+        "Better Fit for Short-Form": "更适合短视频",
+        "Compact duration options fit short-form platforms, quick social posts, and focused creative tests.": "紧凑的时长选项适合短视频平台、快速社交帖子和聚焦创意测试。",
+        "Easier Iteration": "更容易迭代",
+        "Adjust prompts, aspect ratios, durations, quality settings, audio settings, and reference assets.": "调整提示词、宽高比、时长、质量设置、音频设置和参考素材。",
+        "Practical Drafting": "实用草稿创作",
+        "Create visual directions for social posts, demos, ecommerce assets, and product pages without a full production team.": "无需完整制作团队，也能为社交帖子、演示、电商素材和产品页创建视觉方向。",
+        "Video examples": "视频示例",
+        "See Omni AI Video Outputs in Motion": "查看 Omni AI Video 动态输出",
+        "Five local MP4 examples show how short-form AI video outputs can support product scenes, social posts, demos, and creative tests.": "五个本地 MP4 示例展示短 AI 视频输出如何支持产品场景、社交帖子、演示和创意测试。",
+        "Example Video 01": "示例视频 01",
+        "Example Video 02": "示例视频 02",
+        "Example Video 03": "示例视频 03",
+        "Example Video 04": "示例视频 04",
+        "Example Video 05": "示例视频 05",
+        "A compact generated clip for checking visual motion, pacing, and short-form presentation.": "一个紧凑的生成片段，用于查看视觉运动、节奏和短视频呈现。",
+        "Use examples like this to evaluate scene direction, subject consistency, and edit-ready output.": "可用这类示例评估场景方向、主体一致性和可剪辑输出。",
+        "A longer local sample for reviewing motion detail, atmosphere, and MP4 playback quality.": "一个较长的本地样例，用于查看运动细节、氛围和 MP4 播放质量。",
+        "Helpful for comparing how generated clips can work in social, product, or campaign drafts.": "有助于比较生成片段如何用于社交、产品或活动草稿。",
+        "A local preview slot for showing another short AI video result without external hosting.": "一个本地预览位，可在无需外部托管的情况下展示另一个短 AI 视频结果。",
+        "Use cases": "使用场景",
+        "Use Omni AI Video for Everyday Creative Work": "用 Omni AI Video 处理日常创意工作",
+        "Move quickly from an idea or existing asset to a short visual result.": "从想法或现有素材快速得到短视觉结果。",
+        "Social Media Videos": "社交媒体视频",
+        "Create vertical clips for TikTok, Reels, and Shorts. Test hooks, product scenes, character moments, or short visual stories.": "为 TikTok、Reels 和 Shorts 创建竖屏片段，测试钩子、产品场景、角色瞬间或短视觉故事。",
+        "Product Demos": "产品演示",
+        "Turn product images, screenshots, or concept visuals into motion for reveals, app previews, and early demo ideas.": "将产品图、截图或概念视觉转为动态，用于展示、应用预览和早期演示想法。",
+        "Ecommerce Creatives": "电商创意",
+        "Animate product photos, show use cases, create lifestyle scenes, or test ad concepts without a full shoot for every idea.": "让产品照片动起来，展示使用场景，创建生活方式画面，或无需每个想法都完整拍摄即可测试广告概念。",
+        "Short Ad Concepts": "短广告概念",
+        "Draft multiple versions of a creative direction and use 5, 10, or 15-second clips to test pacing and framing.": "为一个创意方向起草多个版本，并用 5、10 或 15 秒片段测试节奏和构图。",
+        "Creator Content": "创作者内容",
+        "Explore character scenes, visual moods, story fragments, and repeatable short-form formats.": "探索角色场景、视觉情绪、故事片段和可复用的短视频格式。",
+        "Explainer Clips": "解释类短片",
+        "Create short explanatory visuals for product features, educational snippets, or simple concept introductions.": "为产品功能、教育片段或简单概念介绍创建短解释视觉。",
+        "Website Hero Videos": "网站首屏视频",
+        "Generate short background or hero video concepts, then refine with branding, compression, captions, or exact timing.": "生成短背景或首屏视频概念，再进一步调整品牌、压缩、字幕或精准时长。",
+        "Localization Experiments": "本地化实验",
+        "Test multilingual or region-specific content directions for experimentation and versioning.": "测试多语言或特定地区内容方向，用于实验和版本化。",
+        "Know What You Can Upload and Export": "了解可上传和导出的内容",
+        "Concrete input, setting, and output details help teams decide whether the workflow fits their project.": "具体的输入、设置和输出细节能帮助团队判断该流程是否适合项目。",
+        "Input or Setting": "输入或设置",
+        "Supported Details": "支持细节",
+        "Best Used For": "最适合用于",
+        "Text prompt": "文本提示词",
+        "Prompt, negative prompt, subject, action, camera direction, mood, dialogue, audio direction": "提示词、负面提示词、主体、动作、镜头方向、情绪、对白、音频方向",
+        "Text-to-video, ad ideas, explainers, creative testing": "文生视频、广告想法、解释短片、创意测试",
+        "General image upload": "普通图片上传",
+        "JPG, PNG, or WebP, up to 10MB": "JPG、PNG 或 WebP，最大 10MB",
+        "Image-to-video, product photos, thumbnails, visual references": "图生视频、产品照片、缩略图、视觉参考",
+        "Reference image": "参考图片",
+        "JPEG, PNG, or WebP, 300-6000px, up to 30MB": "JPEG、PNG 或 WebP，300-6000px，最大 30MB",
+        "Style, subject, composition, and visual direction": "风格、主体、构图和视觉方向",
+        "General video upload": "普通视频上传",
+        "MP4, MOV, or WebM, up to 50MB": "MP4、MOV 或 WebM，最大 50MB",
+        "Reference assets and motion direction": "参考素材和运动方向",
+        "Reference video": "参考视频",
+        "MP4 or MOV, 480-720P, 2-15 seconds, up to 50MB": "MP4 或 MOV，480-720P，2-15 秒，最大 50MB",
+        "Guiding generated scenes from short video references": "用短视频参考指导生成场景",
+        "Reference audio": "参考音频",
+        "WAV or MP3, 2-15 seconds, up to 15MB": "WAV 或 MP3，2-15 秒，最大 15MB",
+        "Voice, ambience, music direction, and sound context": "语音、氛围、音乐方向和声音语境",
+        "Generation settings": "生成设置",
+        "Auto, 16:9, 9:16; 480p, 720p HD, 1080p Full HD; 5, 10, 15 seconds": "Auto、16:9、9:16；480p、720p HD、1080p Full HD；5、10、15 秒",
+        "Platform-specific short-form output": "面向平台的短视频输出",
+        "MP4 video export": "MP4 视频导出",
+        "Social platforms, websites, ads, presentations, or editing tools": "社交平台、网站、广告、演示或剪辑工具",
+        "Lightweight mode": "轻量模式",
+        "High quality mode": "高质量模式",
+        "Audio generation": "音频生成",
+        "Content filtering": "内容过滤",
+        "Fixed camera": "固定镜头",
+        "First frame": "首帧",
+        "Last frame": "尾帧",
+        "Prompting": "提示词",
+        "Write Prompts Like Short Scene Directions": "像写短场景说明一样写提示词",
+        "Clear prompts help Omni AI Video understand what to generate. Treat each prompt like a compact scene brief.": "清晰的提示词能帮助 Omni AI Video 理解要生成什么。把每个提示词当作简短场景简报。",
+        "Include": "包含",
+        "Subject": "主体",
+        "Action": "动作",
+        "Setting": "场景",
+        "Camera direction": "镜头方向",
+        "Mood": "情绪",
+        "Visual style": "视觉风格",
+        "Audio direction": "音频方向",
+        "Dialogue in quotation marks": "用引号标出台词",
+        "Audience": "受众",
+        "Made for Creators, Marketers, and Small Teams": "面向创作者、营销人员和小团队",
+        "Useful for people who want AI video without learning a complex chain of video, image, audio, and editing tools.": "适合想尝试 AI 视频、但不想学习复杂视频、图像、音频和剪辑工具链的人。",
+        "Content Creators": "内容创作者",
+        "Explore short-form ideas, test hooks, create visual drafts, and produce more variations without starting from a blank editing timeline.": "探索短视频想法、测试钩子、创建视觉草稿，并在不从空白剪辑时间线开始的情况下制作更多版本。",
+        "Social Media Managers": "社媒运营",
+        "Create quick versions for different platforms, aspect ratios, moods, and campaign angles.": "为不同平台、宽高比、情绪和活动角度快速创建版本。",
+        "Ecommerce Operators": "电商运营",
+        "Turn product photos into motion, create lifestyle scenes, and test short ad concepts before larger production.": "让产品照片动起来，创建生活方式场景，并在更大制作前测试短广告概念。",
+        "Small Marketing Teams": "小型营销团队",
+        "Draft campaign visuals, product demos, explainer clips, and landing page videos for early ideas.": "为早期想法起草活动视觉、产品演示、解释短片和落地页视频。",
+        "Founders and Indie Makers": "创始人和独立开发者",
+        "Create demo visuals, launch assets, social clips, and pitch materials when you need to communicate quickly.": "需要快速表达时，创建演示视觉、发布素材、社交片段和路演材料。",
+        "Users New to AI Video": "AI 视频新用户",
+        "Try AI video creation without managing a complex multi-tool workflow.": "无需管理复杂多工具流程，也能尝试 AI 视频创作。",
+        "Trust": "信任",
+        "Independent Product, Clear Claims": "独立产品，清晰表达",
+        "Omni AI Video is an independent AI video creation product. References to Omni, Gemini, Google, Veo, or related AI video technologies should not be read as official affiliation unless that affiliation is explicitly stated by the product.": "Omni AI Video 是一个独立的 AI 视频创作产品。除非产品明确说明，否则页面中对 Omni、Gemini、Google、Veo 或相关 AI 视频技术的提及，不应被理解为官方归属关系。",
+        "This page focuses on what users can do inside Omni AI Video: create short clips from prompts, images, and references; use optional audio generation; choose practical output settings; and export MP4 files for publishing or editing.": "本页聚焦用户在 Omni AI Video 中能做什么：从提示词、图片和参考素材创建短片；使用可选音频生成；选择实用输出设置；导出 MP4 用于发布或剪辑。",
+        "Public information around \"Gemini Omni\" and related model names is limited and may include third-party reporting or inference. Product copy should stay grounded in the visible product workflow and user outcomes.": "关于 “Gemini Omni” 及相关模型名称的公开信息有限，可能包含第三方报道或推断。产品文案应基于可见的产品流程和用户结果。",
+        "Common Questions": "常见问题",
+        "Answers focused on inputs, outputs, formats, audio, usage, and product positioning.": "围绕输入、输出、格式、音频、使用方式和产品定位解答。",
+        "Is Omni AI Video affiliated with Google?": "Omni AI Video 与 Google 有关联吗？",
+        "Omni AI Video should be presented as an independent product. Do not describe it as Google-owned unless there is explicit confirmation. References to Gemini, Google, or related AI video technologies should be handled as separate context, not as product ownership.": "Omni AI Video 应作为独立产品呈现。除非有明确确认，不应描述为 Google 旗下产品。对 Gemini、Google 或相关 AI 视频技术的引用应作为独立背景处理，而不是产品归属。",
+        "Can I create videos from text?": "可以从文本创建视频吗？",
+        "Yes. You can start with a text prompt and describe the subject, action, scene, style, camera movement, duration, aspect ratio, and audio direction.": "可以。你可以从文本提示词开始，描述主体、动作、场景、风格、镜头运动、时长、宽高比和音频方向。",
+        "Can I animate an image into a video?": "可以把图片变成视频吗？",
+        "Yes. Image-to-video workflows let you upload a static image and generate motion from it. This is useful for product photos, character images, ecommerce assets, and visual references.": "可以。图生视频流程允许你上传静态图片并生成动态画面，适合产品照片、角色图、电商素材和视觉参考。",
+        "Can I use reference videos?": "可以使用参考视频吗？",
+        "Yes. Reference-to-video workflows can use short video references to guide the generated result. Current product copy lists MP4 or MOV reference videos at 480-720P, 2-15 seconds, up to 50MB.": "可以。参考生视频流程可用短视频参考指导生成结果。当前产品文案列出的参考视频为 MP4 或 MOV，480-720P，2-15 秒，最大 50MB。",
+        "Does Omni AI Video generate audio?": "Omni AI Video 会生成音频吗？",
+        "Omni AI Video includes audio generation options and audio-related inputs. This makes it useful for short clips that need voice, ambience, music direction, or sound context. Results can vary by prompt, input, model, and settings.": "Omni AI Video 包含音频生成选项和音频相关输入，适合需要语音、氛围、音乐方向或声音语境的短片。结果会因提示词、输入、模型和设置而异。",
+        "What formats can I upload?": "可以上传哪些格式？",
+        "The current product copy lists JPG, JPEG, PNG, and WebP for images; MP4, MOV, and WebM for video; and WAV or MP3 for reference audio. Upload limits vary by input type.": "当前产品文案列出的图片格式包括 JPG、JPEG、PNG 和 WebP；视频格式包括 MP4、MOV 和 WebM；参考音频格式包括 WAV 或 MP3。上传限制因输入类型而异。",
+        "What formats can I export?": "可以导出什么格式？",
+        "Generated videos are exported as MP4 files, which can be used on social platforms, websites, ads, presentations, or in editing software.": "生成的视频会导出为 MP4 文件，可用于社交平台、网站、广告、演示或剪辑软件。",
+        "How long can each generated clip be?": "每个生成片段多长？",
+        "Current duration options include 5 seconds, 10 seconds, and 15 seconds. These options are best suited to short-form content, product reveals, quick social posts, and creative testing.": "当前时长选项包括 5 秒、10 秒和 15 秒，适合短视频内容、产品展示、快速社交帖子和创意测试。",
+        "Which aspect ratios are supported?": "支持哪些宽高比？",
+        "Available aspect ratio options include Auto, 16:9, and 9:16. Use 16:9 for YouTube, websites, and presentations. Use 9:16 for TikTok, Reels, and Shorts.": "可用宽高比包括 Auto、16:9 和 9:16。YouTube、网站和演示可用 16:9；TikTok、Reels 和 Shorts 可用 9:16。",
+        "What prompt style works best?": "什么提示词效果更好？",
+        "Short, concrete prompts usually work best. Describe the subject, action, setting, camera movement, mood, visual style, and any audio direction. If the clip needs dialogue, put the spoken line in quotation marks.": "简短、具体的提示词通常效果更好。描述主体、动作、场景、镜头运动、情绪、视觉风格和音频方向。如果需要对白，请用引号标出。",
+        "Can I use generated videos for commercial projects?": "生成视频可以用于商业项目吗？",
+        "Generated clips may be used according to the product's current usage terms. Review those terms before using outputs in commercial projects.": "生成片段可按产品当前使用条款使用。在商业项目中使用输出前，请先查看相关条款。",
+        "Start": "开始",
+        "Create Your First AI Video with Omni AI Video": "用 Omni AI Video 创建你的第一个 AI 视频",
+        "Start with a prompt, image, reference clip, or audio direction. Generate a short MP4 video, review the result, and use it for social content, product visuals, ads, demos, or further editing.": "从提示词、图片、参考片段或音频方向开始。生成短 MP4 视频，查看结果，并用于社交内容、产品视觉、广告、演示或继续剪辑。",
+        "Try Text-to-Video": "试用文生视频",
+        "Close": "关闭",
+        "Loading video preview...": "正在加载视频预览...",
+        "This video could not be loaded. Check that the local videos folder is available.": "无法加载此视频。请检查本地 videos 文件夹是否可用。",
+        "Omni AI Video": "Omni AI Video",
+        "Product claims should reflect current product behavior and terms.": "产品声明应反映当前产品行为和条款。",
+        "Skip to content": "跳到内容"
+      }
+    };
+
+    const languageMeta = {
+      en: { label: "English", lang: "en", dir: "ltr", title: "Omni AI Video Generator | Text, Image, and Reference-Based AI Videos" },
+      zh: { label: "简体中文", lang: "zh-CN", dir: "ltr", title: "Omni AI Video 生成器 | 文本、图像和参考素材生成 AI 视频" },
+      es: { label: "Español", lang: "es", dir: "ltr", title: "Generador Omni AI Video | Videos con texto, imagen y referencias" },
+      hi: { label: "हिन्दी", lang: "hi", dir: "ltr", title: "Omni AI Video Generator | टेक्स्ट, इमेज और रेफरेंस से AI वीडियो" },
+      ar: { label: "العربية", lang: "ar", dir: "rtl", title: "منشئ Omni AI Video | فيديوهات AI من النصوص والصور والمراجع" },
+      pt: { label: "Português", lang: "pt", dir: "ltr", title: "Gerador Omni AI Video | Vídeos por texto, imagem e referência" },
+      fr: { label: "Français", lang: "fr", dir: "ltr", title: "Générateur Omni AI Video | Vidéos par texte, image et référence" },
+      de: { label: "Deutsch", lang: "de", dir: "ltr", title: "Omni AI Video Generator | KI-Videos aus Text, Bild und Referenz" },
+      ja: { label: "日本語", lang: "ja", dir: "ltr", title: "Omni AI Video ジェネレーター | テキスト・画像・参照からAI動画を作成" },
+      ko: { label: "한국어", lang: "ko", dir: "ltr", title: "Omni AI Video 생성기 | 텍스트, 이미지, 레퍼런스로 AI 동영상 제작" }
+    };
+
+    const autoLanguages = {
+      es: {
+        "Create": "Crear", "Workflow": "Flujo", "Examples": "Ejemplos", "Formats": "Formatos", "Use Cases": "Casos de uso", "FAQ": "FAQ",
+        "Start Creating": "Empezar a crear", "Watch Examples": "Ver ejemplos", "See How It Works": "Ver cómo funciona",
+        "AI video creation from text, images, and references": "Creación de video AI desde texto, imágenes y referencias",
+        "Omni AI Video Generator": "Generador Omni AI Video",
+        "What Is Omni AI Video?": "¿Qué es Omni AI Video?", "Create More Than One Kind of AI Video": "Crea más de un tipo de video AI",
+        "Create an AI Video in Three Steps": "Crea un video AI en tres pasos", "Built for Fast AI Video Creation": "Creado para generar video AI con rapidez",
+        "A Faster Way to Explore Video Ideas": "Una forma más rápida de explorar ideas de video",
+        "Use Omni AI Video for Everyday Creative Work": "Usa Omni AI Video para el trabajo creativo diario",
+        "Know What You Can Upload and Export": "Conoce qué puedes subir y exportar",
+        "Write Prompts Like Short Scene Directions": "Escribe prompts como breves indicaciones de escena",
+        "Made for Creators, Marketers, and Small Teams": "Hecho para creadores, marketers y equipos pequeños",
+        "Independent Product, Clear Claims": "Producto independiente, afirmaciones claras",
+        "Common Questions": "Preguntas frecuentes", "Create Your First AI Video with Omni AI Video": "Crea tu primer video AI con Omni AI Video",
+        "Text-to-Video": "Texto a video", "Image-to-Video": "Imagen a video", "Reference-Based Video": "Video basado en referencia",
+        "First and Last Frame": "Primer y último fotograma", "Optional Reference Audio": "Audio de referencia opcional",
+        "Social-Ready Formats": "Formatos listos para redes", "Product Demos": "Demos de producto", "Social Media Videos": "Videos para redes sociales",
+        "Ecommerce Creatives": "Creatividades ecommerce", "Short Ad Concepts": "Conceptos de anuncios cortos", "Creator Content": "Contenido de creadores",
+        "Explainer Clips": "Clips explicativos", "Website Hero Videos": "Videos hero para web", "Localization Experiments": "Experimentos de localización",
+        "Content Creators": "Creadores de contenido", "Social Media Managers": "Gestores de redes sociales", "Ecommerce Operators": "Operadores ecommerce",
+        "Small Marketing Teams": "Equipos pequeños de marketing", "Founders and Indie Makers": "Fundadores y creadores indie", "Users New to AI Video": "Usuarios nuevos en video AI",
+        "Input or Setting": "Entrada o ajuste", "Supported Details": "Detalles compatibles", "Best Used For": "Mejor para",
+        "Prompting": "Prompts", "Audience": "Audiencia", "Trust": "Confianza", "Start": "Empezar", "Try Text-to-Video": "Probar texto a video",
+        "What is Omni AI Video?": "¿Qué es Omni AI Video?", "Is Omni AI Video affiliated with Google?": "¿Omni AI Video está afiliado a Google?",
+        "Can I create videos from text?": "¿Puedo crear videos desde texto?", "Can I animate an image into a video?": "¿Puedo animar una imagen en video?",
+        "Can I use reference videos?": "¿Puedo usar videos de referencia?", "Does Omni AI Video generate audio?": "¿Omni AI Video genera audio?",
+        "What formats can I upload?": "¿Qué formatos puedo subir?", "What formats can I export?": "¿Qué formatos puedo exportar?",
+        "How long can each generated clip be?": "¿Cuánto puede durar cada clip generado?", "Which aspect ratios are supported?": "¿Qué relaciones de aspecto se admiten?",
+        "What prompt style works best?": "¿Qué estilo de prompt funciona mejor?", "Can I use generated videos for commercial projects?": "¿Puedo usar videos generados en proyectos comerciales?"
+      },
+      hi: {
+        "Create": "बनाएं", "Workflow": "वर्कफ़्लो", "Examples": "उदाहरण", "Formats": "फ़ॉर्मैट", "Use Cases": "उपयोग", "FAQ": "FAQ",
+        "Start Creating": "बनाना शुरू करें", "Watch Examples": "उदाहरण देखें", "See How It Works": "कैसे काम करता है",
+        "AI video creation from text, images, and references": "टेक्स्ट, इमेज और रेफरेंस से AI वीडियो बनाएं",
+        "Omni AI Video Generator": "Omni AI Video जनरेटर",
+        "What Is Omni AI Video?": "Omni AI Video क्या है?", "Create More Than One Kind of AI Video": "कई तरह के AI वीडियो बनाएं",
+        "Create an AI Video in Three Steps": "तीन चरणों में AI वीडियो बनाएं", "Built for Fast AI Video Creation": "तेज़ AI वीडियो निर्माण के लिए बनाया गया",
+        "A Faster Way to Explore Video Ideas": "वीडियो आइडिया खोजने का तेज़ तरीका",
+        "Use Omni AI Video for Everyday Creative Work": "रोज़मर्रा के क्रिएटिव काम में Omni AI Video का उपयोग करें",
+        "Know What You Can Upload and Export": "जानें क्या अपलोड और एक्सपोर्ट कर सकते हैं",
+        "Write Prompts Like Short Scene Directions": "प्रॉम्प्ट को छोटे सीन निर्देशों की तरह लिखें",
+        "Made for Creators, Marketers, and Small Teams": "क्रिएटर्स, मार्केटर्स और छोटी टीमों के लिए",
+        "Independent Product, Clear Claims": "स्वतंत्र उत्पाद, स्पष्ट दावे",
+        "Common Questions": "सामान्य प्रश्न", "Create Your First AI Video with Omni AI Video": "Omni AI Video से अपना पहला AI वीडियो बनाएं",
+        "Text-to-Video": "टेक्स्ट से वीडियो", "Image-to-Video": "इमेज से वीडियो", "Reference-Based Video": "रेफरेंस आधारित वीडियो",
+        "First and Last Frame": "पहला और अंतिम फ्रेम", "Optional Reference Audio": "वैकल्पिक रेफरेंस ऑडियो",
+        "Social-Ready Formats": "सोशल-ready फ़ॉर्मैट", "Product Demos": "प्रोडक्ट डेमो", "Social Media Videos": "सोशल मीडिया वीडियो",
+        "Ecommerce Creatives": "ईकॉमर्स क्रिएटिव", "Short Ad Concepts": "छोटे विज्ञापन कॉन्सेप्ट", "Creator Content": "क्रिएटर कंटेंट",
+        "Explainer Clips": "एक्सप्लेनर क्लिप", "Website Hero Videos": "वेबसाइट हीरो वीडियो", "Localization Experiments": "लोकलाइज़ेशन प्रयोग",
+        "Content Creators": "कंटेंट क्रिएटर्स", "Social Media Managers": "सोशल मीडिया मैनेजर", "Ecommerce Operators": "ईकॉमर्स ऑपरेटर",
+        "Small Marketing Teams": "छोटी मार्केटिंग टीमें", "Founders and Indie Makers": "फाउंडर्स और इंडी मेकर्स", "Users New to AI Video": "AI वीडियो में नए उपयोगकर्ता",
+        "Input or Setting": "इनपुट या सेटिंग", "Supported Details": "समर्थित विवरण", "Best Used For": "सबसे अच्छा उपयोग",
+        "Prompting": "प्रॉम्प्टिंग", "Audience": "दर्शक", "Trust": "विश्वास", "Start": "शुरू करें", "Try Text-to-Video": "टेक्स्ट-से-वीडियो आज़माएं"
+      },
+      ar: {
+        "Create": "إنشاء", "Workflow": "سير العمل", "Examples": "أمثلة", "Formats": "الصيغ", "Use Cases": "الاستخدامات", "FAQ": "الأسئلة",
+        "Start Creating": "ابدأ الإنشاء", "Watch Examples": "شاهد الأمثلة", "See How It Works": "شاهد طريقة العمل",
+        "AI video creation from text, images, and references": "إنشاء فيديو AI من النصوص والصور والمراجع",
+        "Omni AI Video Generator": "منشئ Omni AI Video",
+        "What Is Omni AI Video?": "ما هو Omni AI Video؟", "Create More Than One Kind of AI Video": "أنشئ أكثر من نوع من فيديو AI",
+        "Create an AI Video in Three Steps": "أنشئ فيديو AI في ثلاث خطوات", "Built for Fast AI Video Creation": "مصمم لإنشاء فيديو AI بسرعة",
+        "A Faster Way to Explore Video Ideas": "طريقة أسرع لاستكشاف أفكار الفيديو",
+        "Use Omni AI Video for Everyday Creative Work": "استخدم Omni AI Video في العمل الإبداعي اليومي",
+        "Know What You Can Upload and Export": "اعرف ما يمكنك رفعه وتصديره",
+        "Write Prompts Like Short Scene Directions": "اكتب المطالبات كتعليمات مشهد قصيرة",
+        "Made for Creators, Marketers, and Small Teams": "مصمم للمبدعين والمسوقين والفرق الصغيرة",
+        "Independent Product, Clear Claims": "منتج مستقل وادعاءات واضحة",
+        "Common Questions": "أسئلة شائعة", "Create Your First AI Video with Omni AI Video": "أنشئ أول فيديو AI باستخدام Omni AI Video",
+        "Text-to-Video": "نص إلى فيديو", "Image-to-Video": "صورة إلى فيديو", "Reference-Based Video": "فيديو قائم على مرجع",
+        "First and Last Frame": "الإطار الأول والأخير", "Optional Reference Audio": "صوت مرجعي اختياري",
+        "Social-Ready Formats": "صيغ جاهزة للشبكات الاجتماعية", "Product Demos": "عروض المنتجات", "Social Media Videos": "فيديوهات الشبكات الاجتماعية",
+        "Ecommerce Creatives": "إبداعات التجارة الإلكترونية", "Short Ad Concepts": "أفكار إعلانات قصيرة", "Creator Content": "محتوى المبدعين",
+        "Explainer Clips": "مقاطع شرح", "Website Hero Videos": "فيديوهات واجهة الموقع", "Localization Experiments": "تجارب التوطين",
+        "Content Creators": "منشئو المحتوى", "Social Media Managers": "مديرو الشبكات الاجتماعية", "Ecommerce Operators": "مشغلو التجارة الإلكترونية",
+        "Small Marketing Teams": "فرق تسويق صغيرة", "Founders and Indie Makers": "المؤسسون والمستقلون", "Users New to AI Video": "مستخدمون جدد لفيديو AI",
+        "Input or Setting": "الإدخال أو الإعداد", "Supported Details": "التفاصيل المدعومة", "Best Used For": "أفضل استخدام",
+        "Prompting": "المطالبات", "Audience": "الجمهور", "Trust": "الثقة", "Start": "ابدأ", "Try Text-to-Video": "جرّب النص إلى فيديو"
+      },
+      pt: {
+        "Create": "Criar", "Workflow": "Fluxo", "Examples": "Exemplos", "Formats": "Formatos", "Use Cases": "Usos", "FAQ": "FAQ",
+        "Start Creating": "Começar a criar", "Watch Examples": "Ver exemplos", "See How It Works": "Ver como funciona",
+        "AI video creation from text, images, and references": "Criação de vídeo AI com texto, imagens e referências",
+        "Omni AI Video Generator": "Gerador Omni AI Video",
+        "What Is Omni AI Video?": "O que é Omni AI Video?", "Create More Than One Kind of AI Video": "Crie mais de um tipo de vídeo AI",
+        "Create an AI Video in Three Steps": "Crie um vídeo AI em três etapas", "Built for Fast AI Video Creation": "Feito para criação rápida de vídeo AI",
+        "A Faster Way to Explore Video Ideas": "Uma forma mais rápida de explorar ideias de vídeo",
+        "Use Omni AI Video for Everyday Creative Work": "Use Omni AI Video no trabalho criativo diário",
+        "Know What You Can Upload and Export": "Saiba o que você pode enviar e exportar",
+        "Write Prompts Like Short Scene Directions": "Escreva prompts como instruções curtas de cena",
+        "Made for Creators, Marketers, and Small Teams": "Feito para criadores, marketers e equipes pequenas",
+        "Independent Product, Clear Claims": "Produto independente, mensagens claras",
+        "Common Questions": "Perguntas comuns", "Create Your First AI Video with Omni AI Video": "Crie seu primeiro vídeo AI com Omni AI Video",
+        "Text-to-Video": "Texto para vídeo", "Image-to-Video": "Imagem para vídeo", "Reference-Based Video": "Vídeo baseado em referência",
+        "First and Last Frame": "Primeiro e último quadro", "Optional Reference Audio": "Áudio de referência opcional",
+        "Product Demos": "Demonstrações de produto", "Social Media Videos": "Vídeos para redes sociais", "Ecommerce Creatives": "Criativos para ecommerce",
+        "Short Ad Concepts": "Conceitos de anúncios curtos", "Creator Content": "Conteúdo para criadores", "Explainer Clips": "Clipes explicativos",
+        "Website Hero Videos": "Vídeos hero para sites", "Localization Experiments": "Experimentos de localização",
+        "Input or Setting": "Entrada ou configuração", "Supported Details": "Detalhes compatíveis", "Best Used For": "Melhor para",
+        "Prompting": "Prompts", "Audience": "Público", "Trust": "Confiança", "Start": "Começar", "Try Text-to-Video": "Testar texto para vídeo"
+      },
+      fr: {
+        "Create": "Créer", "Workflow": "Flux", "Examples": "Exemples", "Formats": "Formats", "Use Cases": "Cas d’usage", "FAQ": "FAQ",
+        "Start Creating": "Commencer", "Watch Examples": "Voir des exemples", "See How It Works": "Voir le fonctionnement",
+        "AI video creation from text, images, and references": "Création vidéo AI à partir de texte, images et références",
+        "Omni AI Video Generator": "Générateur Omni AI Video",
+        "What Is Omni AI Video?": "Qu’est-ce qu’Omni AI Video ?", "Create More Than One Kind of AI Video": "Créez plusieurs types de vidéos AI",
+        "Create an AI Video in Three Steps": "Créez une vidéo AI en trois étapes", "Built for Fast AI Video Creation": "Conçu pour créer des vidéos AI rapidement",
+        "A Faster Way to Explore Video Ideas": "Une façon plus rapide d’explorer des idées vidéo",
+        "Use Omni AI Video for Everyday Creative Work": "Utilisez Omni AI Video pour le travail créatif quotidien",
+        "Know What You Can Upload and Export": "Découvrez ce que vous pouvez importer et exporter",
+        "Write Prompts Like Short Scene Directions": "Écrivez vos prompts comme de courtes indications de scène",
+        "Made for Creators, Marketers, and Small Teams": "Pour créateurs, marketeurs et petites équipes",
+        "Independent Product, Clear Claims": "Produit indépendant, messages clairs",
+        "Common Questions": "Questions fréquentes", "Create Your First AI Video with Omni AI Video": "Créez votre première vidéo AI avec Omni AI Video",
+        "Text-to-Video": "Texte vers vidéo", "Image-to-Video": "Image vers vidéo", "Reference-Based Video": "Vidéo basée sur référence",
+        "First and Last Frame": "Première et dernière image", "Optional Reference Audio": "Audio de référence optionnel",
+        "Product Demos": "Démos produit", "Social Media Videos": "Vidéos réseaux sociaux", "Ecommerce Creatives": "Créatifs ecommerce",
+        "Short Ad Concepts": "Concepts de publicités courtes", "Creator Content": "Contenu créateur", "Explainer Clips": "Clips explicatifs",
+        "Website Hero Videos": "Vidéos hero de site", "Localization Experiments": "Tests de localisation",
+        "Input or Setting": "Entrée ou réglage", "Supported Details": "Détails pris en charge", "Best Used For": "Idéal pour",
+        "Prompting": "Prompts", "Audience": "Audience", "Trust": "Confiance", "Start": "Démarrer", "Try Text-to-Video": "Essayer texte vers vidéo"
+      },
+      de: {
+        "Create": "Erstellen", "Workflow": "Workflow", "Examples": "Beispiele", "Formats": "Formate", "Use Cases": "Anwendungen", "FAQ": "FAQ",
+        "Start Creating": "Jetzt erstellen", "Watch Examples": "Beispiele ansehen", "See How It Works": "So funktioniert es",
+        "AI video creation from text, images, and references": "AI-Videoerstellung aus Text, Bildern und Referenzen",
+        "Omni AI Video Generator": "Omni AI Video Generator",
+        "What Is Omni AI Video?": "Was ist Omni AI Video?", "Create More Than One Kind of AI Video": "Erstelle mehr als eine Art von AI-Video",
+        "Create an AI Video in Three Steps": "Erstelle ein AI-Video in drei Schritten", "Built for Fast AI Video Creation": "Für schnelle AI-Videoerstellung entwickelt",
+        "A Faster Way to Explore Video Ideas": "Ein schnellerer Weg, Videoideen zu erkunden",
+        "Use Omni AI Video for Everyday Creative Work": "Nutze Omni AI Video für tägliche Kreativarbeit",
+        "Know What You Can Upload and Export": "Was du hochladen und exportieren kannst",
+        "Write Prompts Like Short Scene Directions": "Schreibe Prompts wie kurze Szenenanweisungen",
+        "Made for Creators, Marketers, and Small Teams": "Für Creator, Marketer und kleine Teams",
+        "Independent Product, Clear Claims": "Unabhängiges Produkt, klare Aussagen",
+        "Common Questions": "Häufige Fragen", "Create Your First AI Video with Omni AI Video": "Erstelle dein erstes AI-Video mit Omni AI Video",
+        "Text-to-Video": "Text zu Video", "Image-to-Video": "Bild zu Video", "Reference-Based Video": "Referenzbasiertes Video",
+        "First and Last Frame": "Erster und letzter Frame", "Optional Reference Audio": "Optionale Referenz-Audio",
+        "Product Demos": "Produktdemos", "Social Media Videos": "Social-Media-Videos", "Ecommerce Creatives": "Ecommerce-Creatives",
+        "Short Ad Concepts": "Kurze Anzeigenkonzepte", "Creator Content": "Creator-Content", "Explainer Clips": "Erklärclips",
+        "Website Hero Videos": "Website-Hero-Videos", "Localization Experiments": "Lokalisierungstests",
+        "Input or Setting": "Eingabe oder Einstellung", "Supported Details": "Unterstützte Details", "Best Used For": "Am besten für",
+        "Prompting": "Prompting", "Audience": "Zielgruppe", "Trust": "Vertrauen", "Start": "Start", "Try Text-to-Video": "Text zu Video testen"
+      },
+      ja: {
+        "Create": "作成", "Workflow": "ワークフロー", "Examples": "サンプル", "Formats": "形式", "Use Cases": "用途", "FAQ": "FAQ",
+        "Start Creating": "作成を始める", "Watch Examples": "サンプルを見る", "See How It Works": "使い方を見る",
+        "AI video creation from text, images, and references": "テキスト、画像、参照素材からAI動画を作成",
+        "Omni AI Video Generator": "Omni AI Video ジェネレーター",
+        "What Is Omni AI Video?": "Omni AI Videoとは？", "Create More Than One Kind of AI Video": "複数タイプのAI動画を作成",
+        "Create an AI Video in Three Steps": "3ステップでAI動画を作成", "Built for Fast AI Video Creation": "すばやいAI動画制作のために設計",
+        "A Faster Way to Explore Video Ideas": "動画アイデアをより速く試す方法",
+        "Use Omni AI Video for Everyday Creative Work": "日常のクリエイティブ作業にOmni AI Videoを活用",
+        "Know What You Can Upload and Export": "アップロードとエクスポートできる内容",
+        "Write Prompts Like Short Scene Directions": "短いシーン指示のようにプロンプトを書く",
+        "Made for Creators, Marketers, and Small Teams": "クリエイター、マーケター、小規模チーム向け",
+        "Independent Product, Clear Claims": "独立した製品、明確な表現",
+        "Common Questions": "よくある質問", "Create Your First AI Video with Omni AI Video": "Omni AI Videoで最初のAI動画を作成",
+        "Text-to-Video": "テキストから動画", "Image-to-Video": "画像から動画", "Reference-Based Video": "参照ベース動画",
+        "First and Last Frame": "最初と最後のフレーム", "Optional Reference Audio": "任意の参照音声",
+        "Product Demos": "製品デモ", "Social Media Videos": "SNS動画", "Ecommerce Creatives": "ECクリエイティブ",
+        "Short Ad Concepts": "短尺広告コンセプト", "Creator Content": "クリエイターコンテンツ", "Explainer Clips": "説明クリップ",
+        "Website Hero Videos": "Webサイト用ヒーロー動画", "Localization Experiments": "ローカライズ実験",
+        "Input or Setting": "入力または設定", "Supported Details": "対応詳細", "Best Used For": "主な用途",
+        "Prompting": "プロンプト", "Audience": "対象ユーザー", "Trust": "信頼", "Start": "開始", "Try Text-to-Video": "テキストから動画を試す"
+      },
+      ko: {
+        "Create": "제작", "Workflow": "워크플로", "Examples": "예시", "Formats": "형식", "Use Cases": "사용 사례", "FAQ": "FAQ",
+        "Start Creating": "제작 시작", "Watch Examples": "예시 보기", "See How It Works": "작동 방식 보기",
+        "AI video creation from text, images, and references": "텍스트, 이미지, 레퍼런스로 AI 동영상 제작",
+        "Omni AI Video Generator": "Omni AI Video 생성기",
+        "What Is Omni AI Video?": "Omni AI Video란?", "Create More Than One Kind of AI Video": "여러 유형의 AI 동영상 제작",
+        "Create an AI Video in Three Steps": "세 단계로 AI 동영상 만들기", "Built for Fast AI Video Creation": "빠른 AI 동영상 제작을 위해 설계",
+        "A Faster Way to Explore Video Ideas": "동영상 아이디어를 더 빠르게 탐색하는 방법",
+        "Use Omni AI Video for Everyday Creative Work": "일상적인 창작 작업에 Omni AI Video 활용",
+        "Know What You Can Upload and Export": "업로드 및 내보내기 가능한 항목",
+        "Write Prompts Like Short Scene Directions": "짧은 장면 지시처럼 프롬프트 작성",
+        "Made for Creators, Marketers, and Small Teams": "크리에이터, 마케터, 소규모 팀을 위해 제작",
+        "Independent Product, Clear Claims": "독립 제품, 명확한 설명",
+        "Common Questions": "자주 묻는 질문", "Create Your First AI Video with Omni AI Video": "Omni AI Video로 첫 AI 동영상 만들기",
+        "Text-to-Video": "텍스트-동영상", "Image-to-Video": "이미지-동영상", "Reference-Based Video": "레퍼런스 기반 동영상",
+        "First and Last Frame": "첫 프레임과 마지막 프레임", "Optional Reference Audio": "선택적 레퍼런스 오디오",
+        "Product Demos": "제품 데모", "Social Media Videos": "소셜 미디어 동영상", "Ecommerce Creatives": "이커머스 크리에이티브",
+        "Short Ad Concepts": "짧은 광고 콘셉트", "Creator Content": "크리에이터 콘텐츠", "Explainer Clips": "설명 클립",
+        "Website Hero Videos": "웹사이트 히어로 동영상", "Localization Experiments": "현지화 실험",
+        "Input or Setting": "입력 또는 설정", "Supported Details": "지원 세부 정보", "Best Used For": "주요 용도",
+        "Prompting": "프롬프트", "Audience": "대상", "Trust": "신뢰", "Start": "시작", "Try Text-to-Video": "텍스트-동영상 사용해보기"
+      }
+    };
+
+    Object.assign(translations, autoLanguages);
+
+    const textNodes = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent || ["SCRIPT", "STYLE", "OPTION"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      textNodes.push({ node, source: node.nodeValue });
+    }
+
+    const translatableAttrs = [];
+    document.querySelectorAll("[aria-label], [title], [content]").forEach((el) => {
+      ["aria-label", "title", "content"].forEach((attr) => {
+        if (el.hasAttribute(attr)) translatableAttrs.push({ el, attr, source: el.getAttribute(attr) });
+      });
+    });
+
+    function translateText(source, lang) {
+      if (lang === "en") return source;
+      const dict = translations[lang] || {};
+      const trimmed = source.trim();
+      const translated = dict[trimmed];
+      if (!translated) return source;
+      return source.replace(trimmed, translated);
+    }
+
+    function setLanguage(lang) {
+      const meta = languageMeta[lang] || languageMeta.en;
+      document.documentElement.lang = meta.lang;
+      document.documentElement.dir = meta.dir;
+      document.title = meta.title;
+      document.querySelector('meta[name="description"]').setAttribute("content", translateText("Omni AI Video helps you create short AI videos from text prompts, images, and reference clips. Generate MP4 clips with optional audio, multiple aspect ratios, and short-form output options for social posts, ads, demos, and creative tests.", lang));
+
+      textNodes.forEach(({ node, source }) => {
+        node.nodeValue = translateText(source, lang);
+      });
+
+      translatableAttrs.forEach(({ el, attr, source }) => {
+        el.setAttribute(attr, translateText(source, lang));
+      });
+
+      requestAnimationFrame(fitSingleLineHeadings);
+    }
+
+    function fitSingleLineHeadings() {
+      document.querySelectorAll("h1, h2, h3").forEach((heading) => {
+        heading.style.fontSize = "";
+        let size = parseFloat(getComputedStyle(heading).fontSize);
+        const minSize = heading.tagName === "H1" ? 16 : heading.tagName === "H2" ? 9 : 9;
+        while (heading.scrollWidth > heading.clientWidth + 1 && size > minSize) {
+          size -= 1;
+          heading.style.fontSize = `${size}px`;
+        }
+      });
+    }
+    window.fitSingleLineHeadings = fitSingleLineHeadings;
+
+    const selector = document.getElementById("languageSelect");
+    const savedLanguage = localStorage.getItem("omni-language-manual") === "1" ? localStorage.getItem("omni-language") : null;
+    const browserLanguage = (navigator.language || "en").slice(0, 2);
+    const initialLanguage = savedLanguage || (languageMeta[browserLanguage] ? browserLanguage : "en");
+    selector.value = initialLanguage;
+    setLanguage(initialLanguage);
+    selector.addEventListener("change", (event) => {
+      localStorage.setItem("omni-language-manual", "1");
+      localStorage.setItem("omni-language", event.target.value);
+      setLanguage(event.target.value);
+    });
+    window.addEventListener("resize", fitSingleLineHeadings);
+
+    const videoModal = document.getElementById("videoModal");
+    const videoModalPlayer = document.getElementById("videoModalPlayer");
+    const videoModalTitle = document.getElementById("videoModalTitle");
+    const videoModalClose = document.getElementById("videoModalClose");
+    const videoModalStatus = document.getElementById("videoModalStatus");
+
+    function closeVideoModal() {
+      videoModal.classList.remove("open");
+      videoModal.setAttribute("aria-hidden", "true");
+      videoModalStatus.classList.remove("show");
+      videoModalPlayer.pause();
+      videoModalPlayer.removeAttribute("src");
+      videoModalPlayer.load();
+    }
+
+    document.querySelectorAll(".video-thumb").forEach((button) => {
+      button.addEventListener("click", () => {
+        videoModalTitle.textContent = button.dataset.videoTitle || "Example Video";
+        videoModalStatus.textContent = translateText("Loading video preview...", selector.value);
+        videoModalStatus.classList.add("show");
+        videoModalPlayer.src = button.dataset.videoSrc;
+        videoModal.classList.add("open");
+        videoModal.setAttribute("aria-hidden", "false");
+        videoModalPlayer.load();
+        videoModalPlayer.play().catch(() => {});
+        videoModalClose.focus();
+      });
+    });
+
+    videoModalPlayer.addEventListener("canplay", () => {
+      videoModalStatus.classList.remove("show");
+    });
+    videoModalPlayer.addEventListener("error", () => {
+      videoModalStatus.textContent = translateText("This video could not be loaded. Check that the local videos folder is available.", selector.value);
+      videoModalStatus.classList.add("show");
+    });
+
+    videoModalClose.addEventListener("click", closeVideoModal);
+    videoModal.addEventListener("click", (event) => {
+      if (event.target === videoModal) closeVideoModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && videoModal.classList.contains("open")) closeVideoModal();
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        const targetId = link.getAttribute("href");
+        if (!targetId || targetId === "#") return;
+        const target = document.querySelector(targetId);
+        if (!target) return;
+        event.preventDefault();
+        const navOffset = document.querySelector(".nav-wrap").offsetHeight + 16;
+        const top = target.getBoundingClientRect().top + window.scrollY - navOffset;
+        window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
+        history.pushState(null, "", targetId);
+      });
+    });
+  </script>
+</body>
+</html>
